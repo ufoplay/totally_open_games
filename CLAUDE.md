@@ -21,7 +21,7 @@ This repository is a Rust + Bevy rewrite of the `elyosh` projects. There is one 
 - **Integer mappings become enums.** Values read from files use `TryFrom` with an unknown fallback. OR-able bit sets
   use `bitflags`.
 - **Stay close to upstream structure.** One module per C file with the same name. `#[doc(alias = "<C name>")]` on every
-  ported function. Address annotations (`FUNCTION: TIE95 0x…`) are kept. Intentional changes are marked
+  ported function whose Rust name differs from the C name. Address annotations (`FUNCTION: TIE95 0x…`) are kept. Intentional changes are marked
   `// DEVIATION:` and listed in the crate's `DEVIATIONS.md`.
 - **Simulation and rendering are separate.**
   - State is changed only by `step` functions.
@@ -34,7 +34,7 @@ This repository is a Rust + Bevy rewrite of the `elyosh` projects. There is one 
 ## Upstream tracking
 
 - **Pinned commit:** each crate's `Cargo.toml` has `[package.metadata.upstream] repository/commit`, the last upstream
-  commit fully reflected.
+  commit fully reflected. `commit` is added with the first ported function; only `aeron` is pinned so far.
 - **Clones:** upstream clones live in `.upstream/<Repo>` (gitignored). Until `just upstream-fetch` exists, clone them
   by hand: `git clone https://github.com/elyosh/<Repo> .upstream/<Repo>` for Aeron, imuse, landru, OpenXW, OpenXvT,
   OpenTIE and OpenXWA.
@@ -57,12 +57,16 @@ This repository is a Rust + Bevy rewrite of the `elyosh` projects. There is one 
 
 - **Done (2026-10-10):** analysis and plan. Virtual workspace with stub crates: libraries in `crates/{aeron,imuse,landru}`,
   games in `bin/{openxw,opentie,openxvt,openxwa}`; `[workspace.lints]` with `unsafe_code = "forbid"`.
-- **Next: M0 scaffolding** (PLAN §7):
+- **In progress: M1 headless aeron** (`crates/aeron`): `vfs` + `vfs_iso9660`, `config_file`, `numeric` and the
+  `asset` decoders (LFD, PNL, ACT, BMP, ABP, bitmap font, image coverage) are ported with unit tests. `just test-data`
+  runs the game-data tests on every XW and TIE edition under `games_dir` (hardcoded in the `Justfile`:
+  `/home/ufo/Temp/Games/xwing/<OpenXW|OpenTIE|OpenXvT|OpenXWA>/games/<edition>`). They pass, including the GOG disc
+  images; every LFD archive parses.
+- **Still open from M0** (PLAN §7):
   - GPL-3.0 `LICENSE` file;
-  - `justfile`;
   - `tools/devtool` (upstream fetch/status/diff/bump + usage scan);
   - the first `USAGE.toml` files;
-  - the `harness/` skeleton;
-  - CI.
-- **Then:** M1 headless aeron (vfs + iso9660, config, decoders) → M2 imuse ∥ M3 landru → M4 aeron Bevy runtime.
+  - the `harness/` skeleton.
+- **Then:** M1's exit criterion (reads LFDs from a GOG disc image) is met; close M1 →
+  M2 imuse ∥ M3 landru → M4 aeron Bevy runtime.
 - **Toolchain:** Rust 1.98 (edition 2024), Bevy 0.20, just 1.54.

@@ -9,7 +9,6 @@ repository.workspace = true
 
 [package.metadata.upstream]
 repository = "https://github.com/elyosh/OpenXWA"
-commit = "4d71b7ccb660e4b112dc86ec79f1cba740ac6096"
 
 [dependencies]
 aeron.workspace = true

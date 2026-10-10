@@ -9,7 +9,6 @@ repository.workspace = true
 
 [package.metadata.upstream]
 repository = "https://github.com/elyosh/landru"
-commit = "bbc73c360f7ccf97b87687c3201abab2af0b0fac"
 
 [lints]
 workspace = true

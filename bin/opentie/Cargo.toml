@@ -9,7 +9,6 @@ repository.workspace = true
 
 [package.metadata.upstream]
 repository = "https://github.com/elyosh/OpenTIE"
-commit = "8b24fb9ea9a06fd5f5dc9a675d6287fd71ef1c11"
 
 [dependencies]
 aeron.workspace = true

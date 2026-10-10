@@ -14,5 +14,11 @@ aeron = { path = "crates/aeron" }
 imuse = { path = "crates/imuse" }
 landru = { path = "crates/landru" }
 
+bitflags = "2"
+saphyr-parser = "0.1"
+tempfile = "3"
+thiserror = "2"
+tracing = "0.1"
+
 [workspace.lints.rust]
 unsafe_code = "forbid"

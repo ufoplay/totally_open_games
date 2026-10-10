@@ -200,6 +200,9 @@ repository = "https://github.com/elyosh/landru"
 commit = "bbc73c360f7ccf97b87687c3201abab2af0b0fac"
 ```
 
+A crate has no `commit` until its first function is ported. Porting then starts at the snapshot commit in §0, which
+becomes the crate's first pin.
+
 - **`crates/<name>/USAGE.toml` is the generated inventory of used functions.**
   - It is produced by `just usage` and committed. For each public C function it records which games call it, and
     whether it is ported (detected through `#[doc(alias)]`).
@@ -412,7 +415,7 @@ only the recipes invoke.
 | `just usage [crate]` | regenerate `USAGE.toml` from the games at their pinned commits |
 | `just harness-build` | build the C reference programs at the pinned commits |
 | `just traces <crate>` | regenerate reference traces (needs game data) |
-| `just test-data` | run the tests that need game data (`TOG_DATA_XW`, `TOG_DATA_TIE`) |
+| `just test-data` | run the tests that need game data (every XW/TIE edition under the Justfile's `games_dir`; `TOG_DATA_XW` / `TOG_DATA_TIE` override) |
 
 ## 6. Verification
 
@@ -423,8 +426,9 @@ There are no upstream tests, so we compare the port against the original C code 
   - imuse: OPL register writes + PCM block hashes;
   - landru: the hash of each presented frame and palette.
 - **Rust tests compare against those traces.** Only hashes are committed, never game data.
-- **Game data is user-supplied** through `TOG_DATA_XW` / `TOG_DATA_TIE`: an install folder or a GOG disc image. Tests
-  skip when it is absent.
+- **Game data is user-supplied** through `TOG_DATA_XW` / `TOG_DATA_TIE`: a `PATH`-style list of install folders and GOG
+  disc images. Tests skip when it is absent. `just test-data` fills both lists from the `games_dir` hardcoded in the
+  Justfile, covering every XW and TIE edition (DOS floppy, Collector's CD disc image, 1998 Windows).
 - **Format parsers get unit tests** on synthetic data built in the tests.
 - **Simulation tests** (§1.5) drive `step` with scripted `InputFrame`s and assert on state, without calling the
   renderer and without Bevy or an audio device. **Rasteriser tests** feed a state and compare frame hashes.
@@ -468,3 +472,9 @@ There are no upstream tests, so we compare the port against the original C code 
 | 9 | `just` is the task runner for every command-line action | 2026-10-10 |
 | 10 | Simulation state is independent of rendering. Renderers (CPU rasterisers and audio synthesis included) only read it, so the simulation can be developed and tested without a renderer (§1.5). This takes precedence over staying close to upstream structure. | 2026-10-10 |
 | 11 | Game bin crates live in `bin/<game>`, library crates in `crates/<name>`. Internal crates are referenced through `[workspace.dependencies]`. Licence field is `GPL-3.0-only`. | 2026-10-10 |
+| 12 | `[package.metadata.upstream] commit` is added only when a crate ports its first function; until then the §0 snapshot is the reference | 2026-10-10 |
+| 13 | `#[doc(alias)]` is omitted where the Rust name equals the C name (rustdoc rejects such an alias); usage tracking matches the item name or its aliases | 2026-10-10 |
+| 14 | Decoder failures become one `thiserror` enum per decoder, with upstream codes in the variant docs; C getters that take a fallback return `Option` | 2026-10-10 |
+| 15 | `config_file` parses YAML with `saphyr-parser` events and its own libyaml-style composer, so Aeron's scalar typing and positions stay under our control | 2026-10-10 |
+| 16 | M1 (headless aeron) started before the rest of M0 (`devtool`, `USAGE.toml`); the used functions were found by grepping the four games at their snapshot commits | 2026-10-10 |
+| 17 | Game data for `just test-data` lives at a path hardcoded in the Justfile (`games_dir`); `TOG_DATA_XW` / `TOG_DATA_TIE` are `PATH`-style lists so every edition is tested in one run, and still override the default | 2026-10-10 |
