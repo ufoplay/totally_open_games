@@ -94,7 +94,7 @@ struct IsoEntry {
 }
 
 /// A mounted disc image: the immutable lookup table of every entry, sorted case-insensitively.
-#[doc(alias = "AeronIso9660")]
+#[doc(alias("AeronIso9660", "AeronIso9660_Destroy"))]
 #[derive(Debug)]
 pub(crate) struct Iso9660 {
     source: IsoSource,
@@ -102,7 +102,7 @@ pub(crate) struct Iso9660 {
 }
 
 /// An open file inside a disc image.
-#[doc(alias = "AeronIsoFile")]
+#[doc(alias("AeronIsoFile", "iso_file_close"))]
 #[derive(Debug)]
 pub(crate) struct IsoFile {
     source: IsoSource,

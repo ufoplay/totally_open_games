@@ -204,8 +204,10 @@ A crate has no `commit` until its first function is ported. Porting then starts 
 becomes the crate's first pin.
 
 - **`crates/<name>/USAGE.toml` is the generated inventory of used functions.**
-  - It is produced by `just usage` and committed. For each public C function it records which games call it, and
-    whether it is ported (detected through `#[doc(alias)]`).
+  - It is produced by `just usage` and committed. For each C function of the block (static ones included, third-party
+    code excluded) it records its status (`used` by a game, `reached` from a used function, or `unused`), which games
+    use it, whether it is public, and whether it is ported (detected through `#[doc(alias)]`, §9 #13).
+  - `tools/devtool` scans C without preprocessing (§9 #19), so the inventory errs towards porting too much.
   - Because it is committed, changes in game usage show up in review.
 - **`just upstream-status` filters upstream changes down to what affects us.**
   1. It fetches the 7 repos into `.upstream/` and lists the commits since each pin.
@@ -232,14 +234,18 @@ becomes the crate's first pin.
     - in X-Wing timing mode the tick is 3433 µs instead;
     - fades and triggers run at 60 Hz, ducking at 10 Hz;
     - catch-up is capped at 8 ticks.
-- **Host trait**
-  - `sound_data(id) -> Option<Arc<[u8]>>` replaces `getSoundPtrFunc`.
+- **Host trait** (`ImuseHost`, passed to every call that reads sound data or can fire a callback)
+  - `sound(id) -> Option<Arc<[u8]>>` replaces `getSoundPtrFunc` (and `getSoundSizeFunc`: the slice has a length).
   - `SoundId` is a newtype.
-  - Trigger and defer callbacks are registered closures referenced by `CallbackId`.
+  - Trigger and defer callbacks are game-defined `CallbackId`s. The host's `trigger_callback(&mut self, &mut Imuse,
+    …)` runs inside the tick and may issue commands, as upstream callbacks do (§9 #21).
 - **Layout.** Same two-part split as landru:
   - `state/` holds the engine: `seq`, `players`, `slots`, `sustain`, `triggers`, `fades`, `groups`, `commands`,
-    `dispatch`, `tracks`, `streamer`, `xwing`.
-  - `render/` holds the backends, `fm4_*`, `midi_xwing_adlib`, `gmidi_driver`, OPL3, `mixer` and `wave_renderer`.
+    `dispatch`, `tracks`, `xwing`, plus the game-thread work upstream also does there: the wave `mixer` and the
+    producer end of `wave_renderer`, the DOS93 AdLib driver (which only queues register writes), and the queue
+    ends of the other backends.
+  - `render/` holds what runs on the audio thread: `fm4_driver` + OPL3, `gmidi_driver` + rustysynth, the AdLib
+    chip, and the consumer end of `wave_renderer`.
 - **Threading and separation.** Upstream already matches §1.5:
   - the `Imuse` engine is simulation (sequencer, players, triggers, fades, digital-track dispatch), advanced only by
     `advance(dt)`;
@@ -415,7 +421,7 @@ only the recipes invoke.
 | `just usage [crate]` | regenerate `USAGE.toml` from the games at their pinned commits |
 | `just harness-build` | build the C reference programs at the pinned commits |
 | `just traces <crate>` | regenerate reference traces (needs game data) |
-| `just test-data` | run the tests that need game data (every XW/TIE edition under the Justfile's `games_dir`; `TOG_DATA_XW` / `TOG_DATA_TIE` override) |
+| `just test-data` | run the tests that need game data (every edition under the Justfile's `games_dir`; `TOG_DATA_XW` / `TOG_DATA_TIE` / `TOG_DATA_XVT` / `TOG_DATA_XWA` override) |
 
 ## 6. Verification
 
@@ -426,9 +432,10 @@ There are no upstream tests, so we compare the port against the original C code 
   - imuse: OPL register writes + PCM block hashes;
   - landru: the hash of each presented frame and palette.
 - **Rust tests compare against those traces.** Only hashes are committed, never game data.
-- **Game data is user-supplied** through `TOG_DATA_XW` / `TOG_DATA_TIE`: a `PATH`-style list of install folders and GOG
-  disc images. Tests skip when it is absent. `just test-data` fills both lists from the `games_dir` hardcoded in the
-  Justfile, covering every XW and TIE edition (DOS floppy, Collector's CD disc image, 1998 Windows).
+- **Game data is user-supplied** through `TOG_DATA_XW` / `TOG_DATA_TIE` / `TOG_DATA_XVT` / `TOG_DATA_XWA`: a
+  `PATH`-style list of install folders and GOG disc images per game. Tests skip when it is absent. `just test-data`
+  fills the lists from the `games_dir` hardcoded in the Justfile, covering every edition (XW and TIE: DOS floppy,
+  Collector's CD disc image, 1998 Windows; XvT; XWA).
 - **Format parsers get unit tests** on synthetic data built in the tests.
 - **Simulation tests** (§1.5) drive `step` with scripted `InputFrame`s and assert on state, without calling the
   renderer and without Bevy or an audio device. **Rasteriser tests** feed a state and compare frame hashes.
@@ -477,4 +484,12 @@ There are no upstream tests, so we compare the port against the original C code 
 | 14 | Decoder failures become one `thiserror` enum per decoder, with upstream codes in the variant docs; C getters that take a fallback return `Option` | 2026-10-10 |
 | 15 | `config_file` parses YAML with `saphyr-parser` events and its own libyaml-style composer, so Aeron's scalar typing and positions stay under our control | 2026-10-10 |
 | 16 | M1 (headless aeron) started before the rest of M0 (`devtool`, `USAGE.toml`); the used functions were found by grepping the four games at their snapshot commits | 2026-10-10 |
-| 17 | Game data for `just test-data` lives at a path hardcoded in the Justfile (`games_dir`); `TOG_DATA_XW` / `TOG_DATA_TIE` are `PATH`-style lists so every edition is tested in one run, and still override the default | 2026-10-10 |
+| 17 | Game data for `just test-data` lives at a path hardcoded in the Justfile (`games_dir`); the `TOG_DATA_*` variables are `PATH`-style lists so every edition is tested in one run, and still override the default | 2026-10-10 |
+| 18 | M1 closed: every LFD (with its `PANL`/`XACT` entries), ACT, PNL, BMP, ABP and FNT file of all four games decodes through the VFS, GOG disc images included. The `bevy_asset` `AssetReader` adapter over the VFS moves to M4, where aeron first depends on Bevy | 2026-10-10 |
+| 19 | `devtool` reads upstream files straight from commits (`git cat-file --batch`, the git CLI, no libgit2) and scans C without preprocessing: a game uses a block function when its own `src/` names it, directly or through the block's macros and table initializers; reachability follows function bodies the same way. In each `#if` group all branches are kept when each balances its braces, else only the first. Building-block `third_party/`, `tools/`, `examples/` and `tests/` are excluded. | 2026-10-10 |
+| 20 | A C helper absorbed by Rust idiom (string duplication, buffers, destructors, locale handling) gets a `#[doc(alias)]` on the Rust item that absorbs it, so it counts as ported and upstream changes to it are reported | 2026-10-10 |
+| 21 | imuse: the host is passed to each call that reads sound data or can fire a callback, and a callback gets `&mut Imuse`, so game callbacks re-enter the engine inside the tick as upstream's do. No closures or interior mutability are stored in the engine | 2026-10-10 |
+| 22 | imuse: wave output is produced on the engine's clock, not throttled by the audio device; the renderer absorbs clock drift by dropping or repeating single frames. Resolves the §4.1 "to verify" item | 2026-10-10 |
+| 23 | imuse: streaming (`streamer.c`, stream switching, the streaming opcodes) is not ported: only `imuse_stream_*` reach it and no game calls them | 2026-10-10 |
+| 24 | imuse: the OPL3 emulator is the pure-Rust core of the `nuked-opl3` crate (same author as Nuked-OPL3-fast, claimed bit-identical), taken into `render/opl3.rs` to add the write-buffer query FM4 needs. Bit-exactness is checked when the harness traces exist | 2026-10-10 |
+| 25 | devtool: a static C function counts as ported only through the Rust modules whose `Port of` paragraph names its file; static names repeat across files (every backend has a `vt_note_on`) | 2026-10-10 |

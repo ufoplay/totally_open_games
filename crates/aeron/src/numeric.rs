@@ -12,7 +12,12 @@ pub(crate) fn is_c_space(byte: u8) -> bool {
 /// or that underflow to zero or a subnormal, are rejected like `strtod`'s `ERANGE`.
 ///
 /// DEVIATION: hexadecimal floats (`0x1.8p3`) are rejected; `strtod` accepts them.
-#[doc(alias = "Aeron_ParseAsciiDouble")]
+#[doc(alias(
+    "Aeron_ParseAsciiDouble",
+    "AeronNumeric_Parse",
+    "AeronNumeric_CreateCLocale",
+    "AeronNumeric_DestroyLocale"
+))]
 pub fn parse_ascii_double(text: &str) -> Option<f64> {
     let token = text.trim_start_matches(|c: char| c.is_ascii() && is_c_space(c as u8));
     let unsigned = token.strip_prefix(['+', '-']).unwrap_or(token);
@@ -61,7 +66,7 @@ fn strip_trailing_zeros(text: &str) -> &str {
 
 /// Formats a finite value like `printf("%.*g", significant_digits, value)` in the C locale. Returns `None` for
 /// non-finite values or a digit count outside `1..=17`.
-#[doc(alias = "Aeron_FormatAsciiDouble")]
+#[doc(alias("Aeron_FormatAsciiDouble", "AeronNumeric_Format"))]
 pub fn format_ascii_double(value: f64, significant_digits: u32) -> Option<String> {
     if !value.is_finite() || !(1..=17).contains(&significant_digits) {
         return None;

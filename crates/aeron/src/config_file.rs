@@ -44,7 +44,7 @@ pub enum ConfigErrorCode {
 /// A configuration error with its source location. `line` and `column` are one-based, or zero when unknown.
 ///
 /// DEVIATION: `path` and `message` are not truncated to `AERON_CONFIG_ERROR_*_CAPACITY` (512) bytes.
-#[doc(alias = "AeronConfigError")]
+#[doc(alias("AeronConfigError", "AeronConfig_ClearError"))]
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[error("{path}:{line}:{column}: {message}")]
 pub struct ConfigError {
@@ -129,8 +129,14 @@ pub enum ConfigNodeValue {
     Sequence(Vec<ConfigNode>),
 }
 
-/// A node of a configuration document with its source file and position.
-#[doc(alias("AeronConfigNode", "AeronConfigNode_Destroy"))]
+/// A node of a configuration document with its source file and position. Its strings are owned, which covers
+/// `AeronConfig_DuplicateString` and `AeronConfig_DuplicateBytes`.
+#[doc(alias(
+    "AeronConfigNode",
+    "AeronConfigNode_Destroy",
+    "AeronConfig_DuplicateString",
+    "AeronConfig_DuplicateBytes"
+))]
 #[derive(Debug, Clone, PartialEq)]
 pub struct ConfigNode {
     value: ConfigNodeValue,
@@ -154,7 +160,7 @@ pub struct ConfigFile {
     path: String,
 }
 
-#[doc(alias = "AeronConfig_EqualsIgnoreCase")]
+#[doc(alias("AeronConfig_EqualsIgnoreCase", "AeronConfig_LowerAscii"))]
 fn equals_ignore_case(value: &str, expected: &str) -> bool {
     value.eq_ignore_ascii_case(expected)
 }
@@ -273,7 +279,9 @@ impl From<ScanError> for ComposeError {
     }
 }
 
-/// Builds YAML node trees from parser events, resolving aliases by copying the anchored node.
+/// Builds YAML node trees from parser events, resolving aliases by copying the anchored node. Anchors are keyed by
+/// event id, as libyaml documents number their nodes.
+#[doc(alias = "AeronConfig_YamlNodeId")]
 struct Composer<'input> {
     parser: Parser<'input, saphyr_parser::StrInput<'input>>,
     anchors: HashMap<usize, YamlNode>,
@@ -859,10 +867,15 @@ fn emit_indent(buffer: &mut String, indent: usize) {
     buffer.extend(std::iter::repeat_n(' ', indent));
 }
 
+/// `buffer` is a `String`, which covers `AeronConfigBuffer_Reserve`, `AeronConfigBuffer_Append` and
+/// `AeronConfigBuffer_Text`.
 #[doc(alias(
     "AeronConfig_EmitNode",
     "AeronConfig_EmitMap",
-    "AeronConfig_EmitSequence"
+    "AeronConfig_EmitSequence",
+    "AeronConfigBuffer_Reserve",
+    "AeronConfigBuffer_Append",
+    "AeronConfigBuffer_Text"
 ))]
 fn emit_node(buffer: &mut String, node: &ConfigNode, indent: usize) -> bool {
     match &node.value {

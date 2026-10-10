@@ -9,6 +9,17 @@ repository.workspace = true
 
 [package.metadata.upstream]
 repository = "https://github.com/elyosh/imuse"
+commit = "09d3da46e004413635a58a8646fa01a27bc745b1"
+
+[dependencies]
+bitflags.workspace = true
+rtrb.workspace = true
+rustysynth.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+aeron.workspace = true
 
 [lints]
 workspace = true

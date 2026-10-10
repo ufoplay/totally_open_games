@@ -35,9 +35,15 @@ This repository is a Rust + Bevy rewrite of the `elyosh` projects. There is one 
 
 - **Pinned commit:** each crate's `Cargo.toml` has `[package.metadata.upstream] repository/commit`, the last upstream
   commit fully reflected. `commit` is added with the first ported function; only `aeron` is pinned so far.
-- **Clones:** upstream clones live in `.upstream/<Repo>` (gitignored). Until `just upstream-fetch` exists, clone them
-  by hand: `git clone https://github.com/elyosh/<Repo> .upstream/<Repo>` for Aeron, imuse, landru, OpenXW, OpenXvT,
-  OpenTIE and OpenXWA.
+- **Clones:** upstream clones live in `.upstream/<Repo>` (gitignored); `just upstream-fetch` clones or updates all 7.
+- **Tooling** (`tools/devtool`, through `just`): `upstream-status [crate]` reports commits since the pin as changed-ported
+  / changed-unported / newly used functions; `upstream-diff <crate> [file|function]`; `upstream-bump <crate> <sha>`;
+  `usage [crate]` regenerates `crates/<crate>/USAGE.toml`. Snapshot commits are in the root `Cargo.toml`
+  (`[workspace.metadata.upstream.snapshot]`).
+- **Ported detection:** a C function counts as ported when a Rust item carries its name in `#[doc(alias)]`, or a Rust
+  fn has its exact name in the module whose `//! Port of` header lists its C file. A C helper absorbed by Rust
+  idiom (string duplication, destructors, buffers) gets an alias on the absorbing item, so upstream changes to it
+  are reported.
 - **Snapshot commits analysed (2026-10-10):**
 
   | Repo | Commit |
@@ -57,16 +63,19 @@ This repository is a Rust + Bevy rewrite of the `elyosh` projects. There is one 
 
 - **Done (2026-10-10):** analysis and plan. Virtual workspace with stub crates: libraries in `crates/{aeron,imuse,landru}`,
   games in `bin/{openxw,opentie,openxvt,openxwa}`; `[workspace.lints]` with `unsafe_code = "forbid"`.
-- **In progress: M1 headless aeron** (`crates/aeron`): `vfs` + `vfs_iso9660`, `config_file`, `numeric` and the
-  `asset` decoders (LFD, PNL, ACT, BMP, ABP, bitmap font, image coverage) are ported with unit tests. `just test-data`
-  runs the game-data tests on every XW and TIE edition under `games_dir` (hardcoded in the `Justfile`:
-  `/home/ufo/Temp/Games/xwing/<OpenXW|OpenTIE|OpenXvT|OpenXWA>/games/<edition>`). They pass, including the GOG disc
-  images; every LFD archive parses.
-- **Still open from M0** (PLAN §7):
-  - GPL-3.0 `LICENSE` file;
-  - `tools/devtool` (upstream fetch/status/diff/bump + usage scan);
-  - the first `USAGE.toml` files;
-  - the `harness/` skeleton.
-- **Then:** M1's exit criterion (reads LFDs from a GOG disc image) is met; close M1 →
-  M2 imuse ∥ M3 landru → M4 aeron Bevy runtime.
+- **Done (2026-10-10): M1 headless aeron** (`crates/aeron`): `vfs` + `vfs_iso9660`, `config_file`, `numeric` and the
+  `asset` decoders (LFD, PNL, ACT, BMP, ABP, bitmap font, image coverage), with unit tests. `just test-data` decodes
+  every asset of every edition under `games_dir` (hardcoded in the `Justfile`:
+  `/home/ufo/Temp/Games/xwing/<OpenXW|OpenTIE|OpenXvT|OpenXWA>/games/<edition>`), GOG disc images included. The
+  `bevy_asset` `AssetReader` adapter moves to M4 (PLAN §9 #18).
+- **Done (2026-10-10): M0 scaffolding**: GPL-3.0 `LICENSE`, `tools/devtool`, the `USAGE.toml` of aeron, imuse and
+  landru, and the `harness/` skeleton. `just harness-build` exports the pinned sources but needs CMake, which is not
+  installed on the dev machine yet; the harness has no programs until M2/M3.
+- **In progress: M2 imuse** (`crates/imuse`): every module and backend the games use is ported (FM4 + OPL3, the
+  DOS93 AdLib driver, the SoundFont backend on rustysynth; MT-32/SC-55 dropped, streaming not ported; see
+  `DEVIATIONS.md`). `just test-data` sequences every song of XW and TIE, synthesizes a sample of them and plays
+  voices; `tests/engine.rs` covers markers, re-entrant callbacks and deferred commands. `just example imuse
+  imuse_render <LFD> <[TYPE:]entry> <out.wav> [seconds] [backend]` renders a WAV. **Open:** the exit criterion,
+  matching the C build's OPL register trace and PCM hash, needs the harness program (and CMake on the dev machine).
+- **Then:** finish M2 ∥ M3 landru → M4 aeron Bevy runtime.
 - **Toolchain:** Rust 1.98 (edition 2024), Bevy 0.20, just 1.54.

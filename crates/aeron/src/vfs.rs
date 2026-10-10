@@ -26,8 +26,8 @@ pub struct VfsConfig {
     pub temp_root: Option<String>,
 }
 
-/// Logical root selected for VFS operations.
-#[doc(alias = "AeronVfsRoot")]
+/// Logical root selected for VFS operations. Being an enum, it is always valid (`Aeron_VfsRootValid`).
+#[doc(alias("AeronVfsRoot", "Aeron_VfsRootValid"))]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum VfsRoot {
     #[doc(alias = "AERON_VFS_ROOT_ASSET")]
@@ -320,7 +320,7 @@ impl Vfs {
     /// - the user root defaults to the per-user data directory of `org_name`/`app_name` (both default to
     ///   `aeron`), and to the current directory if that is unavailable;
     /// - the temp root defaults to the user root.
-    #[doc(alias("AeronVfs_Create", "AeronVfs_Init"))]
+    #[doc(alias("AeronVfs_Create", "AeronVfs_Init", "Aeron_InitVfs"))]
     pub fn new(config: &VfsConfig) -> Self {
         let asset_root = normalize_path(&default_path(config.asset_root.as_deref()));
         let resource_root = normalize_path(&default_path(config.resource_root.as_deref()));
@@ -348,7 +348,7 @@ impl Vfs {
         }
     }
 
-    #[doc(alias = "Aeron_InvalidateCaseCache")]
+    #[doc(alias("Aeron_InvalidateCaseCache", "Aeron_FreeCaseDirectory"))]
     fn invalidate_case_cache(&mut self, root: VfsRoot) {
         self.case_directories[root.index()].clear();
     }

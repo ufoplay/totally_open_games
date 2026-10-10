@@ -1,6 +1,8 @@
 import "./just/build.just"
 import "./just/code_check.just"
 import "./just/test.just"
+import "./just/upstream.just"
+import "./just/harness.just"
 
 export RUST_BACKTRACE := "full"
 
