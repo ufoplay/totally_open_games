@@ -28,7 +28,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install Just command runner
-        uses: extractions/setup-just@v
+        uses: extractions/setup-just@v4
 
       - name: check rust code style
         run: |
