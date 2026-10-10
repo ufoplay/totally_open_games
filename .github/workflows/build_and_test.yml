@@ -1,0 +1,47 @@
+name: Rust Build and Test
+
+on:
+  pull_request:
+    branches:
+    - master
+    - develop
+  push:
+    branches:
+    - master
+    - develop
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    env:
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - uses: actions/checkout@v4
+     
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt, llvm-tools-preview
+
+      - name: Cache cargo build artifacts
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install Just command runner
+        uses: extractions/setup-just@v3
+
+      - name: check rust code style
+        run: |
+          just check_code
+
+      # - name: build
+      #   run: |
+      #     just build
+
+      - name: test
+        run: |
+          just test
+
+
