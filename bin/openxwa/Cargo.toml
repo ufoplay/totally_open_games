@@ -1,0 +1,18 @@
+[package]
+name = "openxwa"
+description = "Star Wars: X-Wing Alliance (port of OpenXWA)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[package.metadata.upstream]
+repository = "https://github.com/elyosh/OpenXWA"
+commit = "4d71b7ccb660e4b112dc86ec79f1cba740ac6096"
+
+[dependencies]
+aeron.workspace = true
+
+[lints]
+workspace = true

@@ -171,7 +171,8 @@ crates/
   aeron/                    # lib; `bevy` feature on by default. vfs/config/asset build without it (headless tests)
   imuse/                    # lib; Bevy-free (mirrors upstream)
   landru/                   # lib; Bevy-free (mirrors upstream)
-  openxw/ opentie/ openxvt/ openxwa/   # phase 2+, bin crates
+bin/
+  openxw/ opentie/ openxvt/ openxwa/   # game bin crates (stubs until phase 2)
 tools/devtool/              # Rust CLI behind the upstream / usage / harness recipes; never invoked directly
 harness/                    # C reference programs built against upstream (§6); not part of cargo
 .upstream/                  # git clones of the 7 upstream repos (gitignored)
@@ -466,3 +467,4 @@ There are no upstream tests, so we compare the port against the original C code 
 | 8 | landru: one crate with a runtime variant; revisit a split at the end of M3 | 2026-10-10 |
 | 9 | `just` is the task runner for every command-line action | 2026-10-10 |
 | 10 | Simulation state is independent of rendering. Renderers (CPU rasterisers and audio synthesis included) only read it, so the simulation can be developed and tested without a renderer (§1.5). This takes precedence over staying close to upstream structure. | 2026-10-10 |
+| 11 | Game bin crates live in `bin/<game>`, library crates in `crates/<name>`. Internal crates are referenced through `[workspace.dependencies]`. Licence field is `GPL-3.0-only`. | 2026-10-10 |

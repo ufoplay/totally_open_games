@@ -3,5 +3,45 @@
 version = 4
 
 [[package]]
-name = "totally_open_games"
+name = "aeron"
 version = "0.1.0"
+
+[[package]]
+name = "imuse"
+version = "0.1.0"
+
+[[package]]
+name = "landru"
+version = "0.1.0"
+
+[[package]]
+name = "opentie"
+version = "0.1.0"
+dependencies = [
+ "aeron",
+ "imuse",
+ "landru",
+]
+
+[[package]]
+name = "openxvt"
+version = "0.1.0"
+dependencies = [
+ "aeron",
+]
+
+[[package]]
+name = "openxw"
+version = "0.1.0"
+dependencies = [
+ "aeron",
+ "imuse",
+ "landru",
+]
+
+[[package]]
+name = "openxwa"
+version = "0.1.0"
+dependencies = [
+ "aeron",
+]

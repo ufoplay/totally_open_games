@@ -1,0 +1,18 @@
+[package]
+name = "openxvt"
+description = "Star Wars: X-Wing vs. TIE Fighter (port of OpenXvT)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[package.metadata.upstream]
+repository = "https://github.com/elyosh/OpenXvT"
+commit = "ed6e2c41e0cb2ba2413dd57dea269faad99fb685"
+
+[dependencies]
+aeron.workspace = true
+
+[lints]
+workspace = true

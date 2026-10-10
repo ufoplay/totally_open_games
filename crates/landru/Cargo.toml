@@ -1,0 +1,15 @@
+[package]
+name = "landru"
+description = "Landru cutscene and frontend engine (port of landru)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[package.metadata.upstream]
+repository = "https://github.com/elyosh/landru"
+commit = "bbc73c360f7ccf97b87687c3201abab2af0b0fac"
+
+[lints]
+workspace = true

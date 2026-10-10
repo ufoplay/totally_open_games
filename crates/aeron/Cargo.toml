@@ -1,0 +1,15 @@
+[package]
+name = "aeron"
+description = "Engine layer: VFS, config, asset decoders and the Bevy runtime (port of Aeron)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[package.metadata.upstream]
+repository = "https://github.com/elyosh/Aeron"
+commit = "24e84894ed1d42f8045edbd025da3107f1571535"
+
+[lints]
+workspace = true

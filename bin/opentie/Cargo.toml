@@ -1,0 +1,20 @@
+[package]
+name = "opentie"
+description = "Star Wars: TIE Fighter (port of OpenTIE)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[package.metadata.upstream]
+repository = "https://github.com/elyosh/OpenTIE"
+commit = "8b24fb9ea9a06fd5f5dc9a675d6287fd71ef1c11"
+
+[dependencies]
+aeron.workspace = true
+imuse.workspace = true
+landru.workspace = true
+
+[lints]
+workspace = true

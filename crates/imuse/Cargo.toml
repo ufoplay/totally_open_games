@@ -1,0 +1,15 @@
+[package]
+name = "imuse"
+description = "iMUSE interactive music system (port of imuse)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[package.metadata.upstream]
+repository = "https://github.com/elyosh/imuse"
+commit = "09d3da46e004413635a58a8646fa01a27bc745b1"
+
+[lints]
+workspace = true

@@ -55,11 +55,10 @@ This repository is a Rust + Bevy rewrite of the `elyosh` projects. There is one 
 
 ## Status
 
-- **Done (2026-10-10):** analysis and plan. Only the default `cargo new` skeleton exists in code (`src/main.rs`).
+- **Done (2026-10-10):** analysis and plan. Virtual workspace with stub crates: libraries in `crates/{aeron,imuse,landru}`,
+  games in `bin/{openxw,opentie,openxvt,openxwa}`; `[workspace.lints]` with `unsafe_code = "forbid"`.
 - **Next: M0 scaffolding** (PLAN §7):
-  - turn the root into a workspace with `crates/{aeron,imuse,landru}`;
-  - `[workspace.lints]` with `unsafe_code = "forbid"`;
-  - GPL-3.0 licence;
+  - GPL-3.0 `LICENSE` file;
   - `justfile`;
   - `tools/devtool` (upstream fetch/status/diff/bump + usage scan);
   - the first `USAGE.toml` files;
