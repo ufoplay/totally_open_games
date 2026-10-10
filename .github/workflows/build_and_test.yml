@@ -3,12 +3,10 @@ name: Rust Build and Test
 on:
   pull_request:
     branches:
-    - master
-    - develop
+    - main
   push:
     branches:
-    - master
-    - develop
+    - main
 
 jobs:
   build:
@@ -19,7 +17,7 @@ jobs:
       CARGO_TERM_COLOR: always
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
      
       - name: Install rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -30,7 +28,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install Just command runner
-        uses: extractions/setup-just@v3
+        uses: extractions/setup-just@v
 
       - name: check rust code style
         run: |
